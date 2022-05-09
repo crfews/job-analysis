@@ -1,0 +1,170 @@
+from collections import Counter  # allows us to count the frequency of nouns as they appear
+import requests  # allows us to get HTML requests and scrape web pages
+import spacy  # NLP library
+from bs4 import BeautifulSoup  # counting words
+from textblob import TextBlob  # sentiment analysis
+import matplotlib.pyplot as plt  # creating plots of the frequent words
+import pandas as pd  # for creating a dataframe object that organizes and consolidates the data for easy access
+
+
+class Job_Analysis():
+    """
+    This class was written to analyze a list of URLs from LinkedIn job descriptions to
+    count the most common words in the job description.
+    """
+
+    def __init__(self, url_list):
+        self.links = url_list  # list of links in prescribed format
+        self.raw_list = []  # scraped html content
+        self.content_list = []  # content without html code
+        self.title_list = []  # job titles listed
+        self.company_list = []  # companies listed
+        self.nouns_list = []  # (noun, count) tuples
+        self.verbs_list = []  # (verb, count) tuples
+        self.adverbs_list = []  # (adverb, count) tuples
+        self.polarity_list = []  # polarity of job description
+        self.subjectivity_list = []  # subjectivity of job description
+        self.job_data = pd.DataFrame(
+        )  # all data collected, organized, and stored
+        return None
+
+    def process(self, url):
+        """
+        the following code accesses the website at the link and 
+        extracts job information
+        in: string of link to webpage
+        out: raw text, processed text, job title, company
+        """
+        page = requests.get(url)
+        html = page.text
+        soup = BeautifulSoup(html, 'html.parser')
+        title = soup.find('h1').string
+        company = soup.find(
+            'a', class_='topcard__org-name-link topcard__flavor--black-link'
+        ).string.replace("\\n", "").strip()
+        content = soup.find(
+            'div',
+            class_=
+            'show-more-less-html__markup show-more-less-html__markup--clamp-after-5'
+        )
+        body_string = ''
+        for x in iter(content.stripped_strings):
+            body_string = body_string + x.lower()
+        nlp = spacy.load('en_core_web_sm')
+        doc = nlp(body_string)
+        return body_string, doc, title, company
+
+    def create_graph_words(self, doc, title, company, saveimg=False):
+        """
+        The function takes a job description from LinkedIn 
+        and plots the frequency of the 25 most common nouns, verbs and adverbs.
+        If saveimg is true, it will also save a png of the plot created.
+        in: information from process and boolean to create image
+        out: tuples of (common word, count)
+        """
+
+        nouns = [token.lemma_ for token in doc if token.pos_ == "NOUN"]
+        noun_freq = Counter(nouns)
+        common_nouns = noun_freq.most_common(25)
+        noun_list, noun_occurrence = zip(*common_nouns)
+
+        adverbs = [token.lemma_ for token in doc if token.pos_ == "ADV"]
+        adverb_freq = Counter(adverbs)
+        common_adverbs = adverb_freq.most_common(25)
+        adverb_list, adverb_occurrence = zip(*common_adverbs)
+
+        verbs = [token.lemma_ for token in doc if token.pos_ == "VERB"]
+        verb_freq = Counter(verbs)
+        common_verbs = verb_freq.most_common(25)
+        verb_list, verb_occurrence = zip(*common_verbs)
+
+        ## subplots are used for each class of nouns
+
+        fig, axs = plt.subplots(1, 3, sharex=False, figsize=(16, 6))
+
+        axs[0].bar(x=adverb_list,
+                   height=adverb_occurrence,
+                   width=0.8,
+                   edgecolor='#E6E6E6',
+                   color=['teal', 'mediumorchid'])
+        axs[1].bar(x=noun_list,
+                   height=noun_occurrence,
+                   width=0.8,
+                   edgecolor='#E6E6E6',
+                   color=['tomato', 'steelblue'])
+        axs[2].bar(x=verb_list,
+                   height=verb_occurrence,
+                   width=0.8,
+                   edgecolor='#E6E6E6',
+                   color=['slateblue', 'lightsalmon'])
+
+        for label in axs[0].get_xticklabels():
+            label.set_rotation(45)
+            label.set_ha('right')
+
+        for label in axs[1].get_xticklabels():
+            label.set_rotation(45)
+            label.set_ha('right')
+
+        for label in axs[2].get_xticklabels():
+            label.set_rotation(45)
+            label.set_ha('right')
+
+        axs[0].set_title('Adverbs')
+        axs[1].set_title('Nouns')
+        axs[2].set_title('Verbs')
+
+        fig.suptitle(f'{title} @ {company}')
+        fig.tight_layout()
+
+        if saveimg:
+            plt.savefig(f'job at {company}.png', facecolor='lightgrey')
+
+        return common_adverbs, common_nouns, common_verbs
+
+    def evaluate(self, createimg=False):
+        """
+        This function evaluates all the links and individually graphs
+        the most common words in the job description. There is also an optional
+        boolean argument to save the images plotted by the graph.
+        in: optional boolean to create image, false by default
+        out: none
+        """
+        for link in self.links:
+            # If the url no longer has any text, the user is notified and the loop continues
+            try:
+                raw, content, title, company = self.process(link)
+
+                self.raw_list.append(raw)
+                self.content_list.append(content)
+                self.title_list.append(title)
+                self.company_list.append(company)
+                self.polarity_list.append(TextBlob(raw).polarity)
+                self.subjectivity_list.append(TextBlob(raw).subjectivity)
+
+                self.adverbs_list[len(adverbs_list):], self.nouns_list[
+                    len(nouns_list
+                        ):], self.verbs_list[len(self.verbs_list):] = tuple(
+                            zip(
+                                self.create_graph_words(
+                                    content, title, company, createimg)))
+
+                self.adverbs_list.append(adverbs)
+                self.nouns_list.append(nouns)
+                self.verbs_list.append(verbs)
+
+            except AttributeError:
+                print(f'The link {link} appears to not be working.')
+
+        zipped_data = zip(self.links, self.title_list, self.company_list,
+                          self.raw_list, self.content_list, self.polarity_list,
+                          self.subjectivity_list, self.adverbs_list,
+                          self.nouns_list, self.verbs_list)
+        self.job_data = pd.DataFrame(list(zipped_data),
+                                     columns=[
+                                         'Link', 'Job Title', 'Company',
+                                         'Raw Text', 'Soup', 'Polarity',
+                                         'Subjectivity', 'Adverbs', 'Nouns',
+                                         'Verbs'
+                                     ])
+        return None
