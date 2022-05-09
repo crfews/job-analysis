@@ -154,7 +154,7 @@ class Job_Analysis():
                 self.verbs_list.append(verbs)
 
             except AttributeError:
-                print(f'The link {link} appears to not be working.')
+                print(f'The link {link} appears to not be working. The job listing may not exist or be no longer accepting applications.')
 
         zipped_data = zip(self.links, self.title_list, self.company_list,
                           self.raw_list, self.content_list, self.polarity_list,
