@@ -41,7 +41,7 @@ class Job_Analysis():
         in: string of link to webpage
         out: raw text, processed text, job title, company
         """
-        headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36',
+        headers = {'user-agent':'Mozilla/5.0 (X11; CrOS x86_64 14469.41.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.57 Safari/537.36',
                    'referer':'https://www.google.com'}
         page = requests.get(url,headers=headers)
         html = page.text
