@@ -5,9 +5,9 @@ from bs4 import BeautifulSoup  # counting words
 from textblob import TextBlob  # sentiment analysis
 import matplotlib.pyplot as plt  # creating plots of the frequent words
 import pandas as pd  # for creating a dataframe object that organizes and consolidates the data for easy access
-import matplotlib.cm as cm
-from matplotlib import rcParams
-from wordcloud import WordCloud, STOPWORDS
+import matplotlib.cm as cm # for plotting cloud
+from matplotlib import rcParams # for plotting cloud
+from wordcloud import WordCloud, STOPWORDS # for creating word clouds
 
 class Job_Analysis():
     """
