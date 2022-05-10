@@ -71,7 +71,7 @@ class Job_Analysis():
         out: tuples of (common word, count)
         """
 
-        for key in kwargs:
+        for key in kwargs: # loop through strings in kwargs
             if key == "NOUN":
                 nouns = [token.lemma_ for token in doc if token.pos_ == "NOUN"]
                 noun_freq = Counter(nouns)
@@ -159,7 +159,8 @@ class Job_Analysis():
         This function evaluates all the links and individually graphs
         the most common words in the job description. There is also an optional
         boolean argument to save the images plotted by the graph.
-        in: optional boolean to create image, false by default
+        in: optional boolean to create image, false by default, and strings of the parts of speech:
+        "ADV" "NOUN" "VERB"
         out: none
         """
         for link in self.links:
@@ -181,7 +182,7 @@ class Job_Analysis():
                         ):], self.verbs_list[len(self.verbs_list):] = tuple(
                             zip(
                                 self.create_graph_words(
-                                    content, title, company, createimg,**kwargs)))
+                                    content, title, company, createimg,**kwargs))) # populate dataset lists with values counted; pass kwargs in here
 
                 #self.adverbs_list.append(adverbs)
                 #self.nouns_list.append(nouns)
