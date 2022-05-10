@@ -71,19 +71,19 @@ class Job_Analysis():
         out: tuples of (common word, count)
         """
 
-        nouns = [token.lemma_ for token in doc if token.pos_ == "NOUN"]
-        noun_freq = Counter(nouns)
-        self.all_nouns.update(noun_freq)
-        common_nouns = noun_freq.most_common(25)
-        noun_list, noun_occurrence = zip(*common_nouns)
+        nouns = [token.lemma_ for token in doc if token.pos_ == "NOUN"] # add to nouns list if word is a noun
+        noun_freq = Counter(nouns) # counter object of tuples of nouns and their frequency
+        self.all_nouns.update(noun_freq) # add the counted nouns to overall counts present in all other links
+        common_nouns = noun_freq.most_common(25) #save the tuples of the most common nouns present in the dataset
+        noun_list, noun_occurrence = zip(*common_nouns) # store the noun list and noun occurrence in separate variables
 
-        adverbs = [token.lemma_ for token in doc if token.pos_ == "ADV"]
+        adverbs = [token.lemma_ for token in doc if token.pos_ == "ADV"] # same as above for adverbs
         adverb_freq = Counter(adverbs)
         self.all_adverbs.update(adverb_freq)
         common_adverbs = adverb_freq.most_common(25)
         adverb_list, adverb_occurrence = zip(*common_adverbs)
 
-        verbs = [token.lemma_ for token in doc if token.pos_ == "VERB"]
+        verbs = [token.lemma_ for token in doc if token.pos_ == "VERB"] # same as above for verbs
         verb_freq = Counter(verbs)
         self.all_verbs.update(verb_freq)
         common_verbs = verb_freq.most_common(25)
