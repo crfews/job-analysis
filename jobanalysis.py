@@ -71,27 +71,31 @@ class Job_Analysis():
         out: tuples of (common word, count)
         """
 
-        nouns = [token.lemma_ for token in doc if token.pos_ == "NOUN"] # add to nouns list if word is a noun
-        noun_freq = Counter(nouns) # counter object of tuples of nouns and their frequency
-        self.all_nouns.update(noun_freq) # add the counted nouns to overall counts present in all other links
-        common_nouns = noun_freq.most_common(25) #save the tuples of the most common nouns present in the dataset
-        noun_list, noun_occurrence = zip(*common_nouns) # store the noun list and noun occurrence in separate variables
+        for key in kwargs:
+            if key == "NOUN":
+                nouns = [token.lemma_ for token in doc if token.pos_ == "NOUN"]
+                noun_freq = Counter(nouns)
+                self.all_nouns.update(noun_freq)
+                common_nouns = noun_freq.most_common(25)
+                noun_list, noun_occurrence = zip(*common_nouns)
+                self.all_words.update(noun_freq)
 
-        adverbs = [token.lemma_ for token in doc if token.pos_ == "ADV"] # same as above for adverbs
-        adverb_freq = Counter(adverbs)
-        self.all_adverbs.update(adverb_freq)
-        common_adverbs = adverb_freq.most_common(25)
-        adverb_list, adverb_occurrence = zip(*common_adverbs)
-
-        verbs = [token.lemma_ for token in doc if token.pos_ == "VERB"] # same as above for verbs
-        verb_freq = Counter(verbs)
-        self.all_verbs.update(verb_freq)
-        common_verbs = verb_freq.most_common(25)
-        verb_list, verb_occurrence = zip(*common_verbs)
-        
-        self.all_words.update(adverb_freq)
-        self.all_words.update(noun_freq)
-        self.all_words.update(verb_freq)
+                
+            if key == "ADV":
+                adverbs = [token.lemma_ for token in doc if token.pos_ == "ADV"]
+                adverb_freq = Counter(adverbs)
+                self.all_adverbs.update(adverb_freq)
+                common_adverbs = adverb_freq.most_common(25)
+                adverb_list, adverb_occurrence = zip(*common_adverbs)
+                self.all_words.update(adverb_freq)
+            
+            if key == "VERB":
+                verbs = [token.lemma_ for token in doc if token.pos_ == "VERB"]
+                verb_freq = Counter(verbs)
+                self.all_verbs.update(verb_freq)
+                common_verbs = verb_freq.most_common(25)
+                verb_list, verb_occurrence = zip(*common_verbs)
+                self.all_words.update(verb_freq)
         
 
         ## subplots are used for each class of nouns
