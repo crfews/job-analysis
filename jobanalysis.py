@@ -152,7 +152,7 @@ class Job_Analysis():
         plt.show()
         return None
 
-    def evaluate(self, createimg=False):
+    def evaluate(self, createimg=False,**kwargs):
         """
         This function evaluates all the links and individually graphs
         the most common words in the job description. There is also an optional
@@ -179,7 +179,7 @@ class Job_Analysis():
                         ):], self.verbs_list[len(self.verbs_list):] = tuple(
                             zip(
                                 self.create_graph_words(
-                                    content, title, company, createimg)))
+                                    content, title, company, createimg,**kwargs)))
 
                 #self.adverbs_list.append(adverbs)
                 #self.nouns_list.append(nouns)
