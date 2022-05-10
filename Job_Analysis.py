@@ -1,3 +1,4 @@
+%%time
 from collections import Counter  # allows us to count the frequency of nouns as they appear
 import requests  # allows us to get HTML requests and scrape web pages
 import spacy  # NLP library
@@ -5,7 +6,9 @@ from bs4 import BeautifulSoup  # counting words
 from textblob import TextBlob  # sentiment analysis
 import matplotlib.pyplot as plt  # creating plots of the frequent words
 import pandas as pd  # for creating a dataframe object that organizes and consolidates the data for easy access
-
+import matplotlib.cm as cm
+from matplotlib import rcParams
+from wordcloud import WordCloud, STOPWORDS
 
 class Job_Analysis():
     """
@@ -24,6 +27,10 @@ class Job_Analysis():
         self.adverbs_list = []  # (adverb, count) tuples
         self.polarity_list = []  # polarity of job description
         self.subjectivity_list = []  # subjectivity of job description
+        self.all_nouns = Counter()
+        self.all_verbs = Counter()
+        self.all_adverbs = Counter()
+        self.all_words = Counter()
         self.job_data = pd.DataFrame(
         )  # all data collected, organized, and stored
         return None
@@ -35,7 +42,9 @@ class Job_Analysis():
         in: string of link to webpage
         out: raw text, processed text, job title, company
         """
-        page = requests.get(url)
+        headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36',
+                   'referer':'https://www.google.com'}
+        page = requests.get(url,headers=headers)
         html = page.text
         soup = BeautifulSoup(html, 'html.parser')
         title = soup.find('h1').string
@@ -65,18 +74,26 @@ class Job_Analysis():
 
         nouns = [token.lemma_ for token in doc if token.pos_ == "NOUN"]
         noun_freq = Counter(nouns)
+        self.all_nouns.update(noun_freq)
         common_nouns = noun_freq.most_common(25)
         noun_list, noun_occurrence = zip(*common_nouns)
 
         adverbs = [token.lemma_ for token in doc if token.pos_ == "ADV"]
         adverb_freq = Counter(adverbs)
+        self.all_adverbs.update(adverb_freq)
         common_adverbs = adverb_freq.most_common(25)
         adverb_list, adverb_occurrence = zip(*common_adverbs)
 
         verbs = [token.lemma_ for token in doc if token.pos_ == "VERB"]
         verb_freq = Counter(verbs)
+        self.all_verbs.update(verb_freq)
         common_verbs = verb_freq.most_common(25)
         verb_list, verb_occurrence = zip(*common_verbs)
+        
+        self.all_words.update(adverb_freq)
+        self.all_words.update(noun_freq)
+        self.all_words.update(verb_freq)
+        
 
         ## subplots are used for each class of nouns
 
@@ -121,6 +138,16 @@ class Job_Analysis():
             plt.savefig(f'job at {company}.png', facecolor='lightgrey')
 
         return common_adverbs, common_nouns, common_verbs
+    
+    def make_cloud(self):
+        wordcloud = WordCloud(background_color="white", width=800,height=400)
+        wordcloud.generate_from_frequencies(self.all_words)
+        plt.figure( figsize=(20,10) )
+        plt.imshow(wordcloud, interpolation="bilinear")
+        plt.axis("off")
+        plt.savefig('frequent word cloud.png')
+        plt.show()
+        return None
 
     def evaluate(self, createimg=False):
         """
@@ -131,7 +158,9 @@ class Job_Analysis():
         out: none
         """
         for link in self.links:
-            # If the url no longer has any text, the user is notified and the loop continues
+            # If the url no longer works due to the job listing
+            # not accepting more applications, the user is notified
+            # of the broken link and the loop continues.
             try:
                 raw, content, title, company = self.process(link)
 
@@ -142,19 +171,19 @@ class Job_Analysis():
                 self.polarity_list.append(TextBlob(raw).polarity)
                 self.subjectivity_list.append(TextBlob(raw).subjectivity)
 
-                self.adverbs_list[len(adverbs_list):], self.nouns_list[
-                    len(nouns_list
+                self.adverbs_list[len(self.adverbs_list):], self.nouns_list[
+                    len(self.nouns_list
                         ):], self.verbs_list[len(self.verbs_list):] = tuple(
                             zip(
                                 self.create_graph_words(
                                     content, title, company, createimg)))
 
-                self.adverbs_list.append(adverbs)
-                self.nouns_list.append(nouns)
-                self.verbs_list.append(verbs)
+                #self.adverbs_list.append(adverbs)
+                #self.nouns_list.append(nouns)
+                #self.verbs_list.append(verbs)
 
             except AttributeError:
-                print(f'The link {link} appears to not be working. The job listing may not exist or be no longer accepting applications.')
+                print(f'The link {link} appears to not be working.')
 
         zipped_data = zip(self.links, self.title_list, self.company_list,
                           self.raw_list, self.content_list, self.polarity_list,
