@@ -139,6 +139,8 @@ class Job_Analysis():
 
         if saveimg:
             plt.savefig(f'job at {company}.png', facecolor='lightgrey')
+        else:
+            plt.show() # shows plots if not displayed
 
         return common_adverbs, common_nouns, common_verbs
     
