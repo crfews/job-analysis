@@ -62,7 +62,7 @@ class Job_Analysis():
         doc = nlp(body_string)
         return body_string, doc, title, company
 
-    def create_graph_words(self, doc, title, company, saveimg=False):
+    def create_graph_words(self, doc, title, company, saveimg=False, **kwargs):
         """
         The function takes a job description from LinkedIn 
         and plots the frequency of the 25 most common nouns, verbs and adverbs.
