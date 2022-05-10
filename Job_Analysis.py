@@ -1,4 +1,3 @@
-%%time
 from collections import Counter  # allows us to count the frequency of nouns as they appear
 import requests  # allows us to get HTML requests and scrape web pages
 import spacy  # NLP library
