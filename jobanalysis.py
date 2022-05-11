@@ -208,7 +208,7 @@ class Job_Analysis():
                                      ])
         return None
     
-class WordCloud(Job_Analysis):
+class Cloud_Job_Analysis(Job_Analysis):
     def __init__(self, url_list):
         super().__init__(url_list)
 
