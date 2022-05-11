@@ -21,15 +21,11 @@ class Job_Analysis():
         self.content_list = []  # content without html code
         self.title_list = []  # job titles listed
         self.company_list = []  # companies listed
-        self.nouns_list = []  # (noun, count) tuples
-        self.verbs_list = []  # (verb, count) tuples
-        self.adverbs_list = []  # (adverb, count) tuples
+        self.words_list = [] # list of words
         self.polarity_list = []  # polarity of job description
         self.subjectivity_list = []  # subjectivity of job description
-        self.all_nouns = Counter() # count of all nouns in the dataset
-        self.all_verbs = Counter() # count of all verbs in the dataset
-        self.all_adverbs = Counter() # count of all adverbs in the dataset
-        self.all_words = Counter() # count of all "common" words in the dataset
+
+        self.all_words = pd.DataFrame() # count of all "common" words in the dataset
         self.job_data = pd.DataFrame(
         )  # all data collected, organized, and stored
         return None
@@ -71,80 +67,39 @@ class Job_Analysis():
         currently kwargs must be "NOUN","ADV","VERB"
         out: tuples of (common word, count)
         """
-
+        common_df = pd.DataFrame() # dataframe for word types
+        ind = 0
         for key in kwargs: # loop through strings in kwargs
-            if key == "NOUN":
+            fig, axs = plt.subplots(1, len(kwargs), sharex=False, figsize=(16, 6))
+            if key == "ADJ" or key == "ADV" or key == "NOUN" or key == "PRON" or key == "PROPN" or key == "VERB":
                 # list each noun
-                nouns = [token.lemma_ for token in doc if token.pos_ == "NOUN"]
-                noun_freq = Counter(nouns) # create a counter object counting all nouns in the text 
-                self.all_nouns.update(noun_freq) # update the dataset list of all nouns
-                common_nouns = noun_freq.most_common(25) # only take the 25 most common nouns 
-                noun_list, noun_occurrence = zip(*common_nouns) # zips the most common nouns in the dataset
-                self.all_words.update(noun_freq) # updates list of all words
+                words = [token.lemma_ for token in doc if token.pos_ == key]
+                word_freq = Counter(nouns) # create a counter object counting all words of the part of speech in the text 
+                common_words = word_freq.most_common(25) # only take the 25 most common nouns 
+                word_list, word_occurrence = zip(*common_words) # zips the most common nouns in the dataset
+                self.all_words.update(word_freq) # updates list of all words
+                common_df[key] = common_words # creates dataframe to loop through
 
-                
-            if key == "ADV":
-                adverbs = [token.lemma_ for token in doc if token.pos_ == "ADV"]
-                adverb_freq = Counter(adverbs)
-                self.all_adverbs.update(adverb_freq)
-                common_adverbs = adverb_freq.most_common(25)
-                adverb_list, adverb_occurrence = zip(*common_adverbs)
-                self.all_words.update(adverb_freq) # updates list of all words
-            
-            if key == "VERB":
-                verbs = [token.lemma_ for token in doc if token.pos_ == "VERB"]
-                verb_freq = Counter(verbs)
-                self.all_verbs.update(verb_freq)
-                common_verbs = verb_freq.most_common(25)
-                verb_list, verb_occurrence = zip(*common_verbs)
-                self.all_words.update(verb_freq) # updates list of all words
+            ## subplots are used for each class of nouns
         
-
-        ## subplots are used for each class of nouns
-        
-        if len(kwargs) > 2:
-
-            fig, axs = plt.subplots(1, 3, sharex=False, figsize=(16, 6))
-
-            axs[0].bar(x=adverb_list,
-                       height=adverb_occurrence,
-                       width=0.8,
-                       edgecolor='#E6E6E6',
-                       color=['teal', 'mediumorchid']) # creates first plot of adverbs
-            axs[1].bar(x=noun_list,
-                       height=noun_occurrence,
-                       width=0.8,
-                       edgecolor='#E6E6E6',
-                       color=['tomato', 'steelblue']) # creates second plot of adverbs
-            axs[2].bar(x=verb_list,
-                       height=verb_occurrence,
+            axs[ind].bar(x=word_list,
+                       height=word_occurrence,
                        width=0.8,
                        edgecolor='#E6E6E6',
                        color=['slateblue', 'lightsalmon']) # creates third plot of verbs
 
-            for label in axs[0].get_xticklabels():
-                label.set_rotation(45)
-                label.set_ha('right')
+            axs[ind].set_title(key)
+            
+            ind += 1
 
-            for label in axs[1].get_xticklabels():
-                label.set_rotation(45)
-                label.set_ha('right')
 
-            for label in axs[2].get_xticklabels():
-                label.set_rotation(45)
-                label.set_ha('right')
+        fig.suptitle(f'{title} @ {company}')
+        fig.tight_layout()
 
-            axs[0].set_title('Adverbs')
-            axs[1].set_title('Nouns')
-            axs[2].set_title('Verbs')
-
-            fig.suptitle(f'{title} @ {company}')
-            fig.tight_layout()
-
-            if saveimg:
-                plt.savefig(f'job at {company}.png', facecolor='lightgrey')
-            else:
-                plt.show() # shows plots if not displayed
+        if saveimg:
+            plt.savefig(f'job at {company}.png', facecolor='lightgrey')
+        else:
+            plt.show() # shows plots if not displayed
 
         return common_adverbs, common_nouns, common_verbs
     
@@ -181,30 +136,22 @@ class Job_Analysis():
                 self.polarity_list.append(TextBlob(raw).polarity)
                 self.subjectivity_list.append(TextBlob(raw).subjectivity)
 
-                self.adverbs_list[len(self.adverbs_list):], self.nouns_list[
-                    len(self.nouns_list
-                        ):], self.verbs_list[len(self.verbs_list):] = tuple(
+                self.words_list.iloc[len(self.words_list):] = tuple(
                             zip(
                                 self.create_graph_words(
                                     content, title, company, createimg,**kwargs))) # populate dataset lists with values counted; pass kwargs in here
-
-                #self.adverbs_list.append(adverbs)
-                #self.nouns_list.append(nouns)
-                #self.verbs_list.append(verbs)
 
             except AttributeError:
                 print(f'The link {link} appears to not be working. The job listing may be down or the link may be invalid')
 
         zipped_data = zip(self.links, self.title_list, self.company_list,
                           self.raw_list, self.content_list, self.polarity_list,
-                          self.subjectivity_list, self.adverbs_list,
-                          self.nouns_list, self.verbs_list)
+                          self.subjectivity_list, self.words_list)
         self.job_data = pd.DataFrame(list(zipped_data),
                                      columns=[
                                          'Link', 'Job Title', 'Company',
                                          'Raw Text', 'Soup', 'Polarity',
-                                         'Subjectivity', 'Adverbs', 'Nouns',
-                                         'Verbs'
+                                         'Subjectivity', 'Words'
                                      ])
         return None
 
