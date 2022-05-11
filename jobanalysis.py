@@ -207,11 +207,13 @@ class Job_Analysis():
                                          'Verbs'
                                      ])
         return None
-    
+
+### Class that extends Job_Analysis, and has creating word cloud feature
 class Cloud_Job_Analysis(Job_Analysis):
     def __init__(self, url_list):
         super().__init__(url_list)
 
+    ### Creates word cloud from the collected words in Job_Analysis class
     def make_cloud(self):
         wordcloud = WordCloud(background_color="white", width=800,height=400)
         wordcloud.generate_from_frequencies(self.all_words)
