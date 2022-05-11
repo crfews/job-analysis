@@ -26,10 +26,10 @@ class Job_Analysis():
         self.adverbs_list = []  # (adverb, count) tuples
         self.polarity_list = []  # polarity of job description
         self.subjectivity_list = []  # subjectivity of job description
-        self.all_nouns = Counter()
-        self.all_verbs = Counter()
-        self.all_adverbs = Counter()
-        self.all_words = Counter()
+        self.all_nouns = Counter() # count of all nouns in the dataset
+        self.all_verbs = Counter() # count of all verbs in the dataset
+        self.all_adverbs = Counter() # count of all adverbs in the dataset
+        self.all_words = Counter() # count of all "common" words in the dataset
         self.job_data = pd.DataFrame(
         )  # all data collected, organized, and stored
         return None
@@ -68,17 +68,19 @@ class Job_Analysis():
         and plots the frequency of the 25 most common nouns, verbs and adverbs.
         If saveimg is true, it will also save a png of the plot created.
         in: information from process and boolean to create image
+        currently kwargs must be "NOUN","ADV","VERB"
         out: tuples of (common word, count)
         """
 
         for key in kwargs: # loop through strings in kwargs
             if key == "NOUN":
+                # list each noun
                 nouns = [token.lemma_ for token in doc if token.pos_ == "NOUN"]
-                noun_freq = Counter(nouns)
-                self.all_nouns.update(noun_freq)
-                common_nouns = noun_freq.most_common(25)
-                noun_list, noun_occurrence = zip(*common_nouns)
-                self.all_words.update(noun_freq)
+                noun_freq = Counter(nouns) # create a counter object counting all nouns in the text 
+                self.all_nouns.update(noun_freq) # update the dataset list of all nouns
+                common_nouns = noun_freq.most_common(25) # only take the 25 most common nouns 
+                noun_list, noun_occurrence = zip(*common_nouns) # zips the most common nouns in the dataset
+                self.all_words.update(noun_freq) # updates list of all words
 
                 
             if key == "ADV":
@@ -87,7 +89,7 @@ class Job_Analysis():
                 self.all_adverbs.update(adverb_freq)
                 common_adverbs = adverb_freq.most_common(25)
                 adverb_list, adverb_occurrence = zip(*common_adverbs)
-                self.all_words.update(adverb_freq)
+                self.all_words.update(adverb_freq) # updates list of all words
             
             if key == "VERB":
                 verbs = [token.lemma_ for token in doc if token.pos_ == "VERB"]
@@ -95,54 +97,66 @@ class Job_Analysis():
                 self.all_verbs.update(verb_freq)
                 common_verbs = verb_freq.most_common(25)
                 verb_list, verb_occurrence = zip(*common_verbs)
-                self.all_words.update(verb_freq)
+                self.all_words.update(verb_freq) # updates list of all words
         
 
         ## subplots are used for each class of nouns
+        
+        if len(kwargs) > 2:
 
-        fig, axs = plt.subplots(1, 3, sharex=False, figsize=(16, 6))
+            fig, axs = plt.subplots(1, 3, sharex=False, figsize=(16, 6))
 
-        axs[0].bar(x=adverb_list,
-                   height=adverb_occurrence,
-                   width=0.8,
-                   edgecolor='#E6E6E6',
-                   color=['teal', 'mediumorchid'])
-        axs[1].bar(x=noun_list,
-                   height=noun_occurrence,
-                   width=0.8,
-                   edgecolor='#E6E6E6',
-                   color=['tomato', 'steelblue'])
-        axs[2].bar(x=verb_list,
-                   height=verb_occurrence,
-                   width=0.8,
-                   edgecolor='#E6E6E6',
-                   color=['slateblue', 'lightsalmon'])
+            axs[0].bar(x=adverb_list,
+                       height=adverb_occurrence,
+                       width=0.8,
+                       edgecolor='#E6E6E6',
+                       color=['teal', 'mediumorchid']) # creates first plot of adverbs
+            axs[1].bar(x=noun_list,
+                       height=noun_occurrence,
+                       width=0.8,
+                       edgecolor='#E6E6E6',
+                       color=['tomato', 'steelblue']) # creates second plot of adverbs
+            axs[2].bar(x=verb_list,
+                       height=verb_occurrence,
+                       width=0.8,
+                       edgecolor='#E6E6E6',
+                       color=['slateblue', 'lightsalmon']) # creates third plot of verbs
 
-        for label in axs[0].get_xticklabels():
-            label.set_rotation(45)
-            label.set_ha('right')
+            for label in axs[0].get_xticklabels():
+                label.set_rotation(45)
+                label.set_ha('right')
 
-        for label in axs[1].get_xticklabels():
-            label.set_rotation(45)
-            label.set_ha('right')
+            for label in axs[1].get_xticklabels():
+                label.set_rotation(45)
+                label.set_ha('right')
 
-        for label in axs[2].get_xticklabels():
-            label.set_rotation(45)
-            label.set_ha('right')
+            for label in axs[2].get_xticklabels():
+                label.set_rotation(45)
+                label.set_ha('right')
 
-        axs[0].set_title('Adverbs')
-        axs[1].set_title('Nouns')
-        axs[2].set_title('Verbs')
+            axs[0].set_title('Adverbs')
+            axs[1].set_title('Nouns')
+            axs[2].set_title('Verbs')
 
-        fig.suptitle(f'{title} @ {company}')
-        fig.tight_layout()
+            fig.suptitle(f'{title} @ {company}')
+            fig.tight_layout()
 
-        if saveimg:
-            plt.savefig(f'job at {company}.png', facecolor='lightgrey')
-        else:
-            plt.show() # shows plots if not displayed
+            if saveimg:
+                plt.savefig(f'job at {company}.png', facecolor='lightgrey')
+            else:
+                plt.show() # shows plots if not displayed
 
         return common_adverbs, common_nouns, common_verbs
+    
+    def make_cloud(self):
+        wordcloud = WordCloud(background_color="white", width=800,height=400)
+        wordcloud.generate_from_frequencies(self.all_words)
+        plt.figure( figsize=(20,10) )
+        plt.imshow(wordcloud, interpolation="bilinear")
+        plt.axis("off")
+        plt.savefig('frequent word cloud.png')
+        plt.show()
+        return None
 
     def evaluate(self, createimg=False,**kwargs):
         """
@@ -192,19 +206,4 @@ class Job_Analysis():
                                          'Subjectivity', 'Adverbs', 'Nouns',
                                          'Verbs'
                                      ])
-        return None
-
-    
-class WordCloud(Job_Analysis):
-    def __init__(self, url_list):
-        super().__init__(url_list)
-        
-    def make_cloud(self):
-        wordcloud = WordCloud(background_color="white", width=800,height=400)
-        wordcloud.generate_from_frequencies(self.all_words)
-        plt.figure( figsize=(20,10) )
-        plt.imshow(wordcloud, interpolation="bilinear")
-        plt.axis("off")
-        plt.savefig('frequent word cloud.png')
-        plt.show()
         return None
