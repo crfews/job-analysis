@@ -143,16 +143,6 @@ class Job_Analysis():
             plt.show() # shows plots if not displayed
 
         return common_adverbs, common_nouns, common_verbs
-    
-    def make_cloud(self):
-        wordcloud = WordCloud(background_color="white", width=800,height=400)
-        wordcloud.generate_from_frequencies(self.all_words)
-        plt.figure( figsize=(20,10) )
-        plt.imshow(wordcloud, interpolation="bilinear")
-        plt.axis("off")
-        plt.savefig('frequent word cloud.png')
-        plt.show()
-        return None
 
     def evaluate(self, createimg=False,**kwargs):
         """
@@ -202,4 +192,19 @@ class Job_Analysis():
                                          'Subjectivity', 'Adverbs', 'Nouns',
                                          'Verbs'
                                      ])
+        return None
+
+    
+class WordCloud(Job_Analysis):
+    def __init__(self, url_list):
+        super().__init__(url_list)
+        
+    def make_cloud(self):
+        wordcloud = WordCloud(background_color="white", width=800,height=400)
+        wordcloud.generate_from_frequencies(self.all_words)
+        plt.figure( figsize=(20,10) )
+        plt.imshow(wordcloud, interpolation="bilinear")
+        plt.axis("off")
+        plt.savefig('frequent word cloud.png')
+        plt.show()
         return None
