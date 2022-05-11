@@ -211,15 +211,21 @@ class Job_Analysis():
 ### Class that extends Job_Analysis, and has creating word cloud feature
 class Cloud_Job_Analysis(Job_Analysis):
     def __init__(self, url_list):
-        super().__init__(url_list)
+        super().__init__(url_list) # calls super constructor
 
     ### Creates word cloud from the collected words in Job_Analysis class
-    def make_cloud(self):
+    def make_cloud(self,saveplot=false):
+        """
+        in: optional saveplot boolean that saves if true
+        out: none
+        """
         wordcloud = WordCloud(background_color="white", width=800,height=400)
         wordcloud.generate_from_frequencies(self.all_words)
         plt.figure( figsize=(20,10) )
         plt.imshow(wordcloud, interpolation="bilinear")
         plt.axis("off")
-        plt.savefig('frequent word cloud.png')
-        plt.show()
+        if saveplot:
+            plt.savefig('frequent word cloud.png')
+        else:
+            plt.show()
         return None
