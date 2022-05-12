@@ -25,7 +25,7 @@ class Job_Analysis():
         self.polarity_list = []  # polarity of job description
         self.subjectivity_list = []  # subjectivity of job description
 
-        self.all_words = pd.DataFrame() # count of all "common" words in the dataset
+        self.all_words = Counter() # count of all "common" words in the dataset
         self.job_data = pd.DataFrame(
         )  # all data collected, organized, and stored
         return None
@@ -58,7 +58,7 @@ class Job_Analysis():
         doc = nlp(body_string)
         return body_string, doc, title, company
 
-    def create_graph_words(self, doc, title, company, saveimg=False, **kwargs):
+    def create_graph_words(self, doc, title, company, saveimg=False, pos=['ADV','NOUN','VERB'],**kwargs):
         """
         The function takes a job description from LinkedIn 
         and plots the frequency of the 25 most common nouns, verbs and adverbs.
@@ -69,16 +69,17 @@ class Job_Analysis():
         """
         common_df = pd.DataFrame() # dataframe for word types
         ind = 0
-        for key in kwargs: # loop through strings in kwargs
-            fig, axs = plt.subplots(1, len(kwargs), sharex=False, figsize=(16, 6))
-            if key == "ADJ" or key == "ADV" or key == "NOUN" or key == "PRON" or key == "PROPN" or key == "VERB":
+        fig, axs = plt.subplots(1, len(pos), sharex=False, figsize=(16, 6))
+        for wordtype in pos: # loop through strings in kwargs
+            
+            if wordtype == "ADJ" or wordtype == "ADV" or wordtype == "NOUN" or wordtype == "PRON" or wordtype == "PROPN" or wordtype == "VERB":
                 # list each noun
-                words = [token.lemma_ for token in doc if token.pos_ == key]
-                word_freq = Counter(nouns) # create a counter object counting all words of the part of speech in the text 
+                words = [token.lemma_ for token in doc if token.pos_ == wordtype]
+                word_freq = Counter(words) # create a counter object counting all words of the part of speech in the text 
                 common_words = word_freq.most_common(25) # only take the 25 most common nouns 
                 word_list, word_occurrence = zip(*common_words) # zips the most common nouns in the dataset
                 self.all_words.update(word_freq) # updates list of all words
-                common_df[key] = common_words # creates dataframe to loop through
+                common_df[wordtype] = common_words # creates dataframe to loop through
 
             ## subplots are used for each class of nouns
         
@@ -88,7 +89,7 @@ class Job_Analysis():
                        edgecolor='#E6E6E6',
                        color=['slateblue', 'lightsalmon']) # creates third plot of verbs
 
-            axs[ind].set_title(key)
+            axs[ind].set_title(wordtype)
             
             ind += 1
 
@@ -113,7 +114,7 @@ class Job_Analysis():
         plt.show()
         return None
 
-    def evaluate(self, createimg=False,**kwargs):
+    def evaluate(self, createimg=False,pos=['ADV','NOUN','VERB'],**kwargs):
         """
         This function evaluates all the links and individually graphs
         the most common words in the job description. There is also an optional
@@ -139,7 +140,7 @@ class Job_Analysis():
                 self.words_list.iloc[len(self.words_list):] = tuple(
                             zip(
                                 self.create_graph_words(
-                                    content, title, company, createimg,**kwargs))) # populate dataset lists with values counted; pass kwargs in here
+                                    content, title, company, createimg,pos,**kwargs))) # populate dataset lists with values counted; pass kwargs in here
 
             except AttributeError:
                 print(f'The link {link} appears to not be working. The job listing may be down or the link may be invalid')
