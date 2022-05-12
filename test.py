@@ -13,7 +13,7 @@ url_list = [
     'https://www.linkedin.com/jobs/view/3039549560'
 ]
 
-jobs = Cloud_Job_Analysis(url_list) # create cloud object
+jobs = jobanalysis.Cloud_Job_Analysis(url_list) # create cloud object
 
 jobs.evaluate()
 

@@ -161,7 +161,7 @@ class Cloud_Job_Analysis(Job_Analysis):
         super().__init__(url_list) # calls super constructor
 
     ### Creates word cloud from the collected words in Job_Analysis class
-    def make_cloud(self,saveplot=false):
+    def make_cloud(self,saveplot=False):
         """
         in: optional saveplot boolean that saves if true
         out: none
