@@ -101,7 +101,7 @@ class Job_Analysis():
         else:
             plt.show() # shows plots if not displayed
 
-        return common_adverbs, common_nouns, common_verbs
+        return common_words
     
     def make_cloud(self):
         wordcloud = WordCloud(background_color="white", width=800,height=400)
