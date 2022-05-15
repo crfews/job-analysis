@@ -71,7 +71,7 @@ class Job_Analysis():
         ind = 0
         fig, axs = plt.subplots(1, len(pos), sharex=False, figsize=(16, 6))
         for wordtype in pos: # loop through strings in kwargs
-            
+            print(wordtype)
             if wordtype == "ADJ" or wordtype == "ADV" or wordtype == "NOUN" or wordtype == "PRON" or wordtype == "PROPN" or wordtype == "VERB":
                 # list each noun
                 words = [token.lemma_ for token in doc if token.pos_ == wordtype]
@@ -79,7 +79,13 @@ class Job_Analysis():
                 common_words = word_freq.most_common(25) # only take the 25 most common nouns 
                 word_list, word_occurrence = zip(*common_words) # zips the most common nouns in the dataset
                 self.all_words.update(word_freq) # updates list of all words
-                common_df[wordtype] = common_words # creates dataframe to loop through
+                print('dataframe head')
+                print(common_df.head())
+                add = pd.DataFrame(common_words)
+                common_df = pd.concat([common_df, add],axis=1)
+                print('dataframe updated')
+                common_df.head()
+                # common_df[wordtype] = common_words # creates dataframe to loop through
 
             ## subplots are used for each class of nouns
         
@@ -88,6 +94,10 @@ class Job_Analysis():
                        width=0.8,
                        edgecolor='#E6E6E6',
                        color=['slateblue', 'lightsalmon']) # creates third plot of verbs
+            
+            for label in axs[ind].get_xticklabels():
+                label.set_rotation(45)
+                label.set_ha('right')
 
             axs[ind].set_title(wordtype)
             
@@ -137,7 +147,7 @@ class Job_Analysis():
                 self.polarity_list.append(TextBlob(raw).polarity)
                 self.subjectivity_list.append(TextBlob(raw).subjectivity)
 
-                self.words_list.iloc[len(self.words_list):] = tuple(
+                self.words_list[len(self.words_list):] = tuple(
                             zip(
                                 self.create_graph_words(
                                     content, title, company, createimg,pos,**kwargs))) # populate dataset lists with values counted; pass kwargs in here
