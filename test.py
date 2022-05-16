@@ -1,4 +1,5 @@
 import jobanalysis
+import pandas as pd
 
 # create sample list of jobs
 url_list = [
@@ -13,9 +14,13 @@ url_list = [
     'https://www.linkedin.com/jobs/view/3039549560'
 ]
 
-jobs = Cloud_Job_Analysis(url_list) # create cloud object
+jobs = jobanalysis.Cloud_Job_Analysis(url_list) # create cloud object
 
-jobs.evaluate()
+jobs.evaluate(createimg=False,pos=['ADV','NOUN','VERB'])
+
+job_data = jobs.job_data
 
 jobs.make_cloud()
 
+print(job_data)
+# job_data.to_excel('job_data.xlsx')
