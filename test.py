@@ -20,7 +20,7 @@ jobs.evaluate(createimg=False,pos=['ADV','NOUN','VERB'])
 
 job_data = jobs.job_data
 
-jobs.make_cloud()
+jobs.make_cloud(savefig=True)
 
 print(job_data)
-# job_data.to_excel('job_data.xlsx')
+job_data.to_excel('job_data.xlsx')
