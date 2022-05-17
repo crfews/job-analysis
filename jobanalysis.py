@@ -41,6 +41,7 @@ class Job_Analysis():
                    'referer':'https://www.google.com'}
         page = requests.get(url,headers=headers,timeout=10.00)
         html = page.text
+        page.close()
         soup = BeautifulSoup(html, 'html.parser')
         title = soup.find('h1').string
         company = soup.find(
