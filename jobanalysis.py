@@ -111,16 +111,6 @@ class Job_Analysis():
             plt.show() # shows plots if not displayed
 
         return sorted(word_freq, key=word_freq.get, reverse=True)
-    
-    def make_cloud(self):
-        wordcloud = WordCloud(background_color="white", width=800,height=400)
-        wordcloud.generate_from_frequencies(self.all_words)
-        plt.figure( figsize=(20,10) )
-        plt.imshow(wordcloud, interpolation="bilinear")
-        plt.axis("off")
-        plt.savefig('frequent word cloud.png')
-        plt.show()
-        return None
 
     def evaluate(self, createimg=False,pos=['ADV','NOUN','VERB'],**kwargs):
         """
