@@ -16,6 +16,10 @@ class Job_Analysis():
     """
 
     def __init__(self, url_list):
+        """
+        constructor
+        takes list of URLs in https://www.linkedin.com/jobs/view/IDnumber format
+        """
         self.links = url_list  # list of links in prescribed format
         self.raw_list = []  # scraped html content
         self.content_list = []  # content without html code
@@ -39,25 +43,25 @@ class Job_Analysis():
         """
         headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0',
                    'referer':'https://www.google.com'}
-        page = requests.get(url,headers=headers,timeout=10.00)
-        html = page.text
-        page.close()
-        soup = BeautifulSoup(html, 'html.parser')
-        title = soup.find('h1').string
+        page = requests.get(url,headers=headers,timeout=10.00) # access the webpage
+        html = page.text # pull the code from the page
+        page.close() # close the page to avoid errors
+        soup = BeautifulSoup(html, 'html.parser') # parse the html
+        title = soup.find('h1').string # find the job title in the html
         company = soup.find(
             'a', class_='topcard__org-name-link topcard__flavor--black-link'
-        ).string.replace("\\n", "").strip()
+        ).string.replace("\\n", "").strip() # find the company name
         content = soup.find(
             'div',
             class_=
             'show-more-less-html__markup show-more-less-html__markup--clamp-after-5'
-        )
-        body_string = ''
+        ) # pull the job description from the code
+        body_string = '' # create an empty string to store the job description
         for x in iter(content.stripped_strings):
-            body_string = body_string + x.lower()
+            body_string = body_string + x.lower() # convert it to lowercase
         nlp = spacy.load('en_core_web_sm')
         doc = nlp(body_string)
-        return body_string, doc, title, company
+        return content, doc, title, company # return the data from the company to append to the dataframe
 
     def create_graph_words(self, doc, title, company, saveimg=False, pos=['ADV','NOUN','VERB'],**kwargs):
         """
@@ -73,7 +77,7 @@ class Job_Analysis():
         fig, axs = plt.subplots(1, len(pos), sharex=False, figsize=(16, 6))
         for wordtype in pos: # loop through strings in kwargs
             if wordtype == "ADJ" or wordtype == "ADV" or wordtype == "NOUN" or wordtype == "PRON" or wordtype == "PROPN" or wordtype == "VERB":
-                # list each noun
+                # list each word
                 words = [token.lemma_ for token in doc if token.pos_ == wordtype]
                 word_freq = Counter(words) # create a counter object counting all words of the part of speech in the text 
                 common_words = word_freq.most_common(25) # only take the 25 most common nouns 
@@ -92,21 +96,21 @@ class Job_Analysis():
                        width=0.8,
                        edgecolor='#E6E6E6',
                        color=['slateblue', 'lightsalmon']) # creates third plot of verbs
-            
+            # organize the word labels in the bar graph
             for label in axs[ind].get_xticklabels():
                 label.set_rotation(45)
                 label.set_ha('right')
 
-            axs[ind].set_title(wordtype)
+            axs[ind].set_title(wordtype) # set the title of the subplot to the part of speech
             
             ind += 1
 
 
-        fig.suptitle(f'{title} @ {company}')
-        fig.tight_layout()
+        fig.suptitle(f'{title} @ {company}') # title the entire plot
+        fig.tight_layout() # layout to avoid overlapping text
 
         if saveimg:
-            plt.savefig(f'job at {company}.png', facecolor='lightgrey')
+            plt.savefig(f'job at {company}.png', facecolor='lightgrey') # optional argument to save the plot
         else:
             plt.show() # shows plots if not displayed
 
@@ -121,24 +125,26 @@ class Job_Analysis():
         "ADV" "NOUN" "VERB"
         out: none
         """
-        for link in self.links:
+        for link in self.links: # loop through all the links in the instance variable 
             # If the url no longer works due to the job listing
             # not accepting more applications, the user is notified
             # of the broken link and the loop continues.
             try:
-                raw, content, title, company = self.process(link)
+                raw, content, title, company = self.process(link) # attempt to process the links
 
+                # populate instance variables for dataframe 
                 self.raw_list.append(raw)
                 self.content_list.append(content)
                 self.title_list.append(title)
                 self.company_list.append(company)
                 self.polarity_list.append(TextBlob(raw).polarity)
-                self.subjectivity_list.append(TextBlob(raw).subjectivity)
+                self.subjectivity_list.append(TextBlob(raw).subjectivity) 
 
                 self.words_list[len(self.words_list):] = [self.create_graph_words(
                                     content, title, company, createimg,pos,**kwargs)] # populate dataset lists with values counted; pass kwargs in here
 
             except AttributeError:
+                # exception in case the page cannot be accessed
                 print(f'The link {link} appears to not be working. The job listing may be down or the link may be invalid')
 
         zipped_data = zip(self.links, self.title_list, self.company_list,
@@ -150,6 +156,7 @@ class Job_Analysis():
                                          'Raw Text', 'Soup', 'Polarity',
                                          'Subjectivity', 'Words'
                                      ])
+        # add the data to the instance variable of the dataframe
         return None
 
 ### Class that extends Job_Analysis, and has creating word cloud feature
@@ -163,13 +170,13 @@ class Cloud_Job_Analysis(Job_Analysis):
         in: optional saveplot boolean that saves if true
         out: none
         """
-        wordcloud = WordCloud(background_color="white", width=800,height=400)
-        wordcloud.generate_from_frequencies(self.all_words)
-        plt.figure( figsize=(20,10) )
-        plt.imshow(wordcloud, interpolation="bilinear")
+        wordcloud = WordCloud(background_color="white", width=800,height=400) # size cloud
+        wordcloud.generate_from_frequencies(self.all_words) # generate word cloud from all words present in the text
+        plt.figure( figsize=(20,10) ) # extra large figure size
+        plt.imshow(wordcloud, interpolation="bilinear") # put the word cloud in a plot
         plt.axis("off")
         if saveplot:
-            plt.savefig(f'frequent word cloud for {title} jobs.png')
+            plt.savefig(f'frequent word cloud for {title} jobs.png') # save the figure, will not display it
         else:
-            plt.show()
+            plt.show() # shows the figure
         return None
