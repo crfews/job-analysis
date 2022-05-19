@@ -20,7 +20,7 @@ jobs.evaluate(createimg=False,pos=['ADJ','ADV','NOUN'])
 
 job_data = jobs.job_data
 
-jobs.make_cloud(saveplot=False)
+jobs.make_cloud(saveplot=True,title='logistics')
 
 print(job_data)
 job_data.to_excel('logistics_job_data.xlsx')

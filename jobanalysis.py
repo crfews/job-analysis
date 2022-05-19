@@ -158,7 +158,7 @@ class Cloud_Job_Analysis(Job_Analysis):
         super().__init__(url_list) # calls super constructor
 
     ### Creates word cloud from the collected words in Job_Analysis class
-    def make_cloud(self,saveplot=False):
+    def make_cloud(self,saveplot=False,title=''):
         """
         in: optional saveplot boolean that saves if true
         out: none
@@ -169,7 +169,7 @@ class Cloud_Job_Analysis(Job_Analysis):
         plt.imshow(wordcloud, interpolation="bilinear")
         plt.axis("off")
         if saveplot:
-            plt.savefig('frequent word cloud.png')
+            plt.savefig(f'frequent word cloud for {title} jobs.png')
         else:
             plt.show()
         return None
