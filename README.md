@@ -6,6 +6,8 @@ This code contains a class that is able to scrape LinkedIn job listings that are
 1. Navigate to the main page and click code.
 2. Clone the repository in your terminal. 
 ```git clone https://github.com/crfews/job-analysis.git```
+3. Create a virtual environment in the directory e.g. ```python -m venv venv``` and run activate
+4. Install requirements using ```pip install requirements.txt```
 
 ## Examples
 Make sure to install the list of libraries used before running `test.py` or `test2.py`. These test files test the output for data science and logistics job listings, respectively.
