@@ -53,8 +53,7 @@ class Job_Analysis():
         ).string.replace("\\n", "").strip() # find the company name
         content = soup.find(
             'div',
-            class_=
-            'show-more-less-html__markup show-more-less-html__markup--clamp-after-5'
+            class_='show-more-less-html__markup show-more-less-html__markup--clamp-after-5 relative overflow-hidden'
         ) # pull the job description from the code
         body_string = '' # create an empty string to store the job description
         for x in iter(content.stripped_strings):
@@ -137,8 +136,8 @@ class Job_Analysis():
                 self.content_list.append(content)
                 self.title_list.append(title)
                 self.company_list.append(company)
-                self.polarity_list.append(TextBlob(raw).polarity)
-                self.subjectivity_list.append(TextBlob(raw).subjectivity) 
+                self.polarity_list.append(TextBlob(str(raw)).polarity)
+                self.subjectivity_list.append(TextBlob(str(raw)).subjectivity) 
 
                 self.words_list[len(self.words_list):] = [self.create_graph_words(
                                     content, title, company, createimg,pos,**kwargs)] # populate dataset lists with values counted; pass kwargs in here
